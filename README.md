@@ -23,7 +23,7 @@
 
 # An Advanced OSINT Investigation Challenge
 
-**Live:** [blackmirror-osint.netlify.app](https://blackmirror-osint.netlify.app)
+**Live:** [blackmirror-osint.netlify.app](https://blackimirror.netlify.app/)
 
 ---
 

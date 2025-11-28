@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { verifyAnswer, LEVEL_INFO } from '@/data/answers';
 import { getHint, getHintCount } from '@/data/hints';
+import { trackEvent } from '@/lib/supabase';
 
 export type AnswerStatus = 'unchecked' | 'correct' | 'incorrect';
 
@@ -76,8 +77,9 @@ function getInitialState(): ChallengeState {
 
 export function useChallenge(): UseChallengeReturn {
   const [state, setState] = useState<ChallengeState>(getInitialState);
+  const hasTrackedSession = useRef(false);
 
-  // Load from localStorage on mount
+  // Load from localStorage on mount and track session start
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
@@ -87,6 +89,12 @@ export function useChallenge(): UseChallengeReturn {
       } catch {
         // Invalid saved state, use fresh
       }
+    }
+    
+    // Track session start (only once per page load)
+    if (!hasTrackedSession.current) {
+      hasTrackedSession.current = true;
+      trackEvent('session_start');
     }
   }, []);
 
@@ -98,10 +106,33 @@ export function useChallenge(): UseChallengeReturn {
   const checkAnswer = useCallback((level: string, answer: string): boolean => {
     const isCorrect = verifyAnswer(level, answer);
     
+    // Track guess event
+    trackEvent('guess', {
+      level,
+      is_correct: isCorrect,
+      guess_value: answer.slice(0, 50), // Truncate long answers
+    });
+    
     setState(prev => {
       const newAnswers = { ...prev.answers, [level]: isCorrect ? 'correct' : 'incorrect' as AnswerStatus };
       const newSolvedCount = Object.values(newAnswers).filter(s => s === 'correct').length;
       const isNowComplete = newSolvedCount === LEVEL_INFO.length;
+      const wasAlreadyCorrect = prev.answers[level] === 'correct';
+      
+      // Track level completion (only first time)
+      if (isCorrect && !wasAlreadyCorrect) {
+        trackEvent('level_complete', { level });
+      }
+      
+      // Track challenge completion
+      if (isNowComplete && !prev.isComplete) {
+        const completionTime = Date.now() - prev.startTime;
+        trackEvent('challenge_complete', {
+          completion_time_ms: completionTime,
+          total_hints_used: prev.totalHintsUsed,
+          rank: calculateRank(prev.totalHintsUsed),
+        });
+      }
       
       return {
         ...prev,
@@ -127,6 +158,12 @@ export function useChallenge(): UseChallengeReturn {
     
     const hint = getHint(level, currentRevealed);
     if (!hint) return null;
+    
+    // Track hint usage
+    trackEvent('hint_used', {
+      level,
+      hint_number: currentRevealed + 1,
+    });
     
     setState(prev => ({
       ...prev,
@@ -181,4 +218,5 @@ export function useChallenge(): UseChallengeReturn {
     resetChallenge,
   };
 }
+
 

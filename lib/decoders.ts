@@ -131,3 +131,5 @@ export function extractHiddenCharacters(text: string): { visible: string; hidden
   return { visible, hidden };
 }
 
+
+

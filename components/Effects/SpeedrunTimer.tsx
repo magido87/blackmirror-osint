@@ -55,3 +55,5 @@ export function useSpeedrunTimer() {
   return { isRunning, start, stop, finalTime, updateTime };
 }
 
+
+

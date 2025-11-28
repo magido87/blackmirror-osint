@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { WindowState } from '@/hooks/useWindowManager';
+import AdminLogin from '@/components/Admin/AdminLogin';
+import AdminPanel from '@/components/Admin/AdminPanel';
 
 interface TaskbarProps {
   windows: WindowState[];
@@ -30,7 +32,32 @@ export default function Taskbar({ windows, activeWindowId, onWindowClick, solved
   const [clockGlitch, setClockGlitch] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [startTime] = useState(() => Date.now());
+  const [showAdminLogin, setShowAdminLogin] = useState(false);
+  const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
   const isMobile = useIsMobile();
+
+  // Check if already authenticated on mount
+  useEffect(() => {
+    const auth = sessionStorage.getItem('admin-authenticated');
+    if (auth === 'true') {
+      setIsAdminAuthenticated(true);
+    }
+  }, []);
+
+  const handleAdminClick = () => {
+    if (isAdminAuthenticated) {
+      setShowAdminPanel(true);
+    } else {
+      setShowAdminLogin(true);
+    }
+  };
+
+  const handleLoginSuccess = () => {
+    setIsAdminAuthenticated(true);
+    setShowAdminLogin(false);
+    setShowAdminPanel(true);
+  };
 
   // Clock is stuck at 03:14 (the time of the data breach)
   const time = '03:14';
@@ -127,6 +154,20 @@ export default function Taskbar({ windows, activeWindowId, onWindowClick, solved
             <span className="text-xs text-green-400">{solvedCount}/10</span>
           </div>
 
+          {/* Admin Settings (Cog icon) */}
+          <button
+            onClick={handleAdminClick}
+            className={`p-1 rounded transition-colors hover:bg-gray-800 ${
+              isAdminAuthenticated ? 'text-cyan-400' : 'text-gray-600 hover:text-gray-400'
+            }`}
+            title="Admin Panel"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </button>
+
           {/* Clock (stuck) */}
           <div 
             className={`taskbar-clock cursor-pointer ${clockGlitch ? 'glitch' : ''}`}
@@ -137,6 +178,19 @@ export default function Taskbar({ windows, activeWindowId, onWindowClick, solved
           </div>
         </div>
       </div>
+
+      {/* Admin Login Modal */}
+      <AdminLogin
+        isOpen={showAdminLogin}
+        onClose={() => setShowAdminLogin(false)}
+        onSuccess={handleLoginSuccess}
+      />
+
+      {/* Admin Panel */}
+      <AdminPanel
+        isOpen={showAdminPanel}
+        onClose={() => setShowAdminPanel(false)}
+      />
 
       {/* Easter egg toast */}
       {showToast && (

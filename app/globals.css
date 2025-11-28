@@ -231,6 +231,11 @@ html, body {
   border-radius: 50%;
   cursor: pointer;
   transition: all 0.15s ease;
+  border: none;
+  outline: none;
+  padding: 0;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .window-control.close {
@@ -245,8 +250,32 @@ html, body {
   background: #28c840;
 }
 
+.window-control.maximize.maximized {
+  background: #28c840;
+  position: relative;
+}
+
+.window-control.maximize.maximized::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border: 1.5px solid rgba(0, 0, 0, 0.4);
+  border-radius: 1px;
+}
+
 .window-control:hover {
   filter: brightness(1.2);
+  transform: scale(1.1);
+}
+
+/* Resize handle styling */
+.resize-handle {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 16px;
+  height: 16px;
+  cursor: se-resize;
 }
 
 /* Terminal Styling */

@@ -61,3 +61,5 @@ export default function GlitchOverlay({ isGlitching, glitchType }: GlitchOverlay
   );
 }
 
+
+

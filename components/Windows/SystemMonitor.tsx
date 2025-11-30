@@ -97,6 +97,10 @@ export default function SystemMonitor() {
             <span className="text-amber-400">[TIMEOUT]</span>
           </div>
           <div className="flex justify-between">
+            <span className="text-gray-400">FIRIANA-CONTROL</span>
+            <span className="text-green-400">[ACTIVE]</span>
+          </div>
+          <div className="flex justify-between">
             <span className="text-gray-400">EXTERNAL</span>
             <span className="text-red-400">[BLOCKED]</span>
           </div>

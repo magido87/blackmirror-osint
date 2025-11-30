@@ -6,6 +6,7 @@ const LOG_TEMPLATES = [
   'SYS: Memory scan complete',
   'NET: Outbound request blocked (policy)',
   'USR: Session active - mchen',
+  'USR: firiana_Control authenticated',
   'SEC: Anomaly score: {score}',
   'LOG: Evidence index updated',
   'SYS: Disk I/O spike detected',
